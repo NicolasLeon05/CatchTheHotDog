@@ -21,6 +21,7 @@ local scale = 0.2
 -- HotDogs timers
 local lifeTime = 1.5
 local spawnTime = 1.5
+local timeSinceLastSpawn = 0
 
 function love.load()
     -- Player
@@ -36,7 +37,13 @@ end
 
 function love.update(dt)
     movePlayer(dt)
-    spawnImage()
+
+    -- Spawn Images
+    timeSinceLastSpawn = timeSinceLastSpawn + dt
+    if timeSinceLastSpawn >= spawnTime then
+        spawnImage()
+        timeSinceLastSpawn = 0
+    end
 
     -- Player-HotDog collisions
     for i = #hotDog, 1, -1 do
