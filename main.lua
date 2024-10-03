@@ -1,6 +1,8 @@
+-- Screen
 local screenWidth = love.graphics.getWidth()
 local screenHeight = love.graphics.getHeight()
 
+-- Player
 local player = {
     posX = screenWidth / 2,
     posY = screenHeight / 2,
@@ -10,8 +12,11 @@ local player = {
     height
 }
 
-local hotDog = {image, width, height}
-
+-- HotDogs
+local hotDog = {}
+local hotDogImage
+local hotDogWidth
+local hotDogHeight
 local scale = 0.2
 
 function love.load()
@@ -21,19 +26,24 @@ function love.load()
     player.height = player.image:getHeight()
 
     -- HotDog
-    hotDog.image = love.graphics.newImage("res/HotDog.png")
-    hotDog.width = hotDog.image:getWidth() * scale
-    hotDog.height = hotDog.image:getHeight() * scale
-
+    hotDogImage = love.graphics.newImage("res/HotDog.png")
+    hotDogWidth = hotDogImage:getWidth() * scale
+    hotDogHeight = hotDogImage:getHeight() * scale
 end
 
 function love.update(dt)
     movePlayer(dt)
+    spawnImage()
 end
 
 function love.draw()
+    -- Player
     love.graphics.draw(player.image, player.posX, player.posY)
-    love.graphics.draw(hotDog.image, 100, 100, 0, scale, scale)
+
+    -- HotDogs
+    for _, img in ipairs(hotDog) do
+        love.graphics.draw(hotDogImage, img.x, img.y, 0, scale, scale)
+    end
 end
 
 function movePlayer(dt)
@@ -49,4 +59,11 @@ function movePlayer(dt)
     if love.keyboard.isDown("d") then
         player.posX = player.posX + player.speed * dt
     end
+end
+
+function spawnImage()
+    local img = {}
+    img.x = math.random(0, love.graphics.getWidth() - hotDogWidth)
+    img.y = math.random(0, love.graphics.getHeight() - hotDogHeight)
+    table.insert(hotDog, img)
 end
