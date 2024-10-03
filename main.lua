@@ -12,6 +12,8 @@ local player = {
 
 local hotDog = {image, width, height}
 
+local scale = 0.2
+
 function love.load()
     -- Player
     player.image = love.graphics.newImage("res/Dog.png")
@@ -20,8 +22,8 @@ function love.load()
 
     -- HotDog
     hotDog.image = love.graphics.newImage("res/HotDog.png")
-    hotDog.width = hotDog.image:getWidth()
-    hotDog.height = hotDog.image:getHeight()
+    hotDog.width = hotDog.image:getWidth() * scale
+    hotDog.height = hotDog.image:getHeight() * scale
 
 end
 
@@ -31,7 +33,7 @@ end
 
 function love.draw()
     love.graphics.draw(player.image, player.posX, player.posY)
-    love.graphics.draw(hotDog.image, 100, 100, 0)
+    love.graphics.draw(hotDog.image, 100, 100, 0, scale, scale)
 end
 
 function movePlayer(dt)
