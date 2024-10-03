@@ -4,14 +4,14 @@ local screenHeight = love.graphics.getHeight()
 
 -- Player
 local player = {
-    posX = screenWidth / 2,
-    posY = screenHeight / 2,
+    posX,
+    posY,
     speed = 500,
     image,
     width,
     height,
-    score = 0,
-    missed = 0
+    score,
+    missed
 }
 
 -- HotDogs
@@ -69,15 +69,26 @@ function love.update(dt)
         -- Check win/Lose-- Verificar si ha ganado o perdido
         if player.score >= scoreToWin then
             sceneGameplay = false
+            sceneGameFinished = true
             win = true
         end
 
         if player.missed >= missesToLose then
             sceneGameplay = false
+            sceneGameFinished = true
             win = false
         end
+    elseif sceneGameFinished then
+        if love.keyboard.isDown("escape") then
+            sceneGameFinished = false
+            sceneMenu = true
+        elseif love.keyboard.isDown("space") then
+            initGame()
+            sceneGameFinished = false
+            sceneMenu = false
+            sceneGameplay = true
+        end
     end
-
 end
 
 function love.draw()
@@ -95,12 +106,24 @@ function love.draw()
         love.graphics.draw(player.image, player.posX, player.posY)
         drawHotDogs()
         drawStats()
-    else
+
+    elseif sceneGameFinished then
+        love.graphics.setColor(1, 1, 1, 1)
         if win then
+            love.graphics.setFont(largeFont)
             love.graphics.printf("You Won!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
+
+            love.graphics.setFont(mediumFont)
+            love.graphics.printf("Press ESC to go to the menu or Space to restart", 0,
+                love.graphics.getHeight() / 2 + 50, love.graphics.getWidth(), "center")
         else
+            love.graphics.setFont(largeFont)
             love.graphics
                 .printf("You Lost!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
+
+            love.graphics.setFont(mediumFont)
+            love.graphics.printf("Press ESC to go to the menu or Space to restart", 0,
+                love.graphics.getHeight() / 2 + 50, love.graphics.getWidth(), "center")
         end
     end
 end
@@ -114,8 +137,8 @@ function initGame()
     sceneGameFinished = false
     win = false
     hotDog = {}
-    player.width = player.image:getWidth()
-    player.height = player.image:getHeight()
+    player.posX = screenWidth / 2 - player.width / 2
+    player.posY = screenHeight / 2 - player.height / 2
 end
 
 function movePlayer(dt)
