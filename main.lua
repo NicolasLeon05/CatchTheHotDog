@@ -4,19 +4,34 @@ local screenHeight = love.graphics.getHeight()
 local player = {
     posX = screenWidth / 2,
     posY = screenHeight / 2,
-    speed = 500
+    speed = 500,
+    image,
+    width,
+    height
 }
 
-playerImage = love.graphics.newImage("res/Dog.png")
-width = playerImage:getWidth()
-height = playerImage:getHeight()
+local hotDog = {image, width, height}
+
+function love.load()
+    -- Player
+    player.image = love.graphics.newImage("res/Dog.png")
+    player.width = player.image:getWidth()
+    player.height = player.image:getHeight()
+
+    -- HotDog
+    hotDog.image = love.graphics.newImage("res/HotDog.png")
+    hotDog.width = hotDog.image:getWidth()
+    hotDog.height = hotDog.image:getHeight()
+
+end
 
 function love.update(dt)
     movePlayer(dt)
 end
 
 function love.draw()
-    love.graphics.draw(playerImage, player.posX, player.posY)
+    love.graphics.draw(player.image, player.posX, player.posY)
+    love.graphics.draw(hotDog.image, 100, 100, 0)
 end
 
 function movePlayer(dt)
