@@ -18,6 +18,9 @@ local hotDogImage
 local hotDogWidth
 local hotDogHeight
 local scale = 0.2
+-- HotDogs timers
+local lifeTime = 1.5
+local spawnTime = 1.5
 
 function love.load()
     -- Player
@@ -38,6 +41,14 @@ function love.update(dt)
     -- Player-HotDog collisions
     for i = #hotDog, 1, -1 do
         if checkCollision(player, hotDog[i].x, hotDog[i].y, hotDogWidth, hotDogHeight) then
+            table.remove(hotDog, i)
+        end
+    end
+
+    -- HotDog life timer
+    for i, img in ipairs(hotDog) do
+        img.time = img.time + dt
+        if img.time >= lifeTime then
             table.remove(hotDog, i)
         end
     end
@@ -77,5 +88,6 @@ function spawnImage()
     local img = {}
     img.x = math.random(0, love.graphics.getWidth() - hotDogWidth)
     img.y = math.random(0, love.graphics.getHeight() - hotDogHeight)
+    img.time = 0
     table.insert(hotDog, img)
 end
