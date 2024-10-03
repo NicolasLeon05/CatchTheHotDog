@@ -26,7 +26,8 @@ local spawnTime = 1.5
 local timeSinceLastSpawn = 0
 
 -- Win/Lose conditions
-local gameEnded = false
+local gameRunning = true
+local win = false
 local scoreToWin = 10
 local missesToLose = 3
 
@@ -43,7 +44,7 @@ function love.load()
 end
 
 function love.update(dt)
-    if not gameEnded then
+    if gameRunning then
 
         movePlayer(dt)
 
@@ -55,23 +56,35 @@ function love.update(dt)
 
         -- Check win/Lose-- Verificar si ha ganado o perdido
         if player.score >= scoreToWin then
-            gameEnded = true
+            gameRunning = false
+            win = true
         end
 
         if player.missed >= missesToLose then
-            gameEnded = true
+            gameRunning = false
+            win = false
         end
     end
 
 end
 
 function love.draw()
-    -- Player
-    love.graphics.draw(player.image, player.posX, player.posY)
+    if gameRunning then
+        -- Player
+        love.graphics.draw(player.image, player.posX, player.posY)
 
-    -- HotDogs
-    for _, img in ipairs(hotDog) do
-        love.graphics.draw(hotDogImage, img.x, img.y, 0, scale, scale)
+        -- HotDogs
+        for _, img in ipairs(hotDog) do
+            love.graphics.draw(hotDogImage, img.x, img.y, 0, scale, scale)
+        end
+
+    else
+        if win then
+            love.graphics.printf("You Won!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
+        else
+            love.graphics
+                .printf("You Lost!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
+        end
     end
 end
 
