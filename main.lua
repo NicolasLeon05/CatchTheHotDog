@@ -34,6 +34,13 @@ end
 function love.update(dt)
     movePlayer(dt)
     spawnImage()
+
+    -- Player-HotDog collisions
+    for i = #hotDog, 1, -1 do
+        if checkCollision(player, hotDog[i].x, hotDog[i].y, hotDogWidth, hotDogHeight) then
+            table.remove(hotDog, i)
+        end
+    end
 end
 
 function love.draw()
@@ -59,6 +66,11 @@ function movePlayer(dt)
     if love.keyboard.isDown("d") then
         player.posX = player.posX + player.speed * dt
     end
+end
+
+function checkCollision(player, hotDogX, hotDogY, hotDogWidth, hotDogHeight)
+    return player.posX < hotDogX + hotDogWidth and player.posX + player.width > hotDogX and player.posY < hotDogY +
+               hotDogHeight and player.posY + player.height > hotDogY
 end
 
 function spawnImage()
