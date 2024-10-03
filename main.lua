@@ -9,7 +9,9 @@ local player = {
     speed = 500,
     image,
     width,
-    height
+    height,
+    score = 0,
+    missed = 0
 }
 
 -- HotDogs
@@ -22,6 +24,11 @@ local scale = 0.2
 local lifeTime = 1.5
 local spawnTime = 1.5
 local timeSinceLastSpawn = 0
+
+-- Win/Lose conditions
+local gameEnded = false
+local scoreToWin = 10
+local missesToLose = 3
 
 function love.load()
     -- Player
@@ -36,29 +43,26 @@ function love.load()
 end
 
 function love.update(dt)
-    movePlayer(dt)
+    if not gameEnded then
 
-    -- Spawn Images
-    timeSinceLastSpawn = timeSinceLastSpawn + dt
-    if timeSinceLastSpawn >= spawnTime then
-        spawnImage()
-        timeSinceLastSpawn = 0
-    end
+        movePlayer(dt)
 
-    -- Player-HotDog collisions
-    for i = #hotDog, 1, -1 do
-        if checkCollision(player, hotDog[i].x, hotDog[i].y, hotDogWidth, hotDogHeight) then
-            table.remove(hotDog, i)
+        generateHotDog(dt)
+
+        checkEatHotDog()
+
+        checkHotDogDespawn(dt)
+
+        -- Check win/Lose-- Verificar si ha ganado o perdido
+        if player.score >= scoreToWin then
+            gameEnded = true
+        end
+
+        if player.missed >= missesToLose then
+            gameEnded = true
         end
     end
 
-    -- HotDog life timer
-    for i, img in ipairs(hotDog) do
-        img.time = img.time + dt
-        if img.time >= lifeTime then
-            table.remove(hotDog, i)
-        end
-    end
 end
 
 function love.draw()
@@ -97,4 +101,31 @@ function spawnImage()
     img.y = math.random(0, love.graphics.getHeight() - hotDogHeight)
     img.time = 0
     table.insert(hotDog, img)
+end
+
+function generateHotDog(dt)
+    timeSinceLastSpawn = timeSinceLastSpawn + dt
+    if timeSinceLastSpawn >= spawnTime then
+        spawnImage()
+        timeSinceLastSpawn = 0
+    end
+end
+
+function checkEatHotDog()
+    for i = #hotDog, 1, -1 do
+        if checkCollision(player, hotDog[i].x, hotDog[i].y, hotDogWidth, hotDogHeight) then
+            table.remove(hotDog, i)
+            player.score = player.score + 1
+        end
+    end
+end
+
+function checkHotDogDespawn(dt)
+    for i, img in ipairs(hotDog) do
+        img.time = img.time + dt
+        if img.time >= lifeTime then
+            table.remove(hotDog, i)
+            player.missed = player.missed + 1
+        end
+    end
 end
