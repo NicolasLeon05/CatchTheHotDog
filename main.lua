@@ -26,10 +26,14 @@ local spawnTime = 1.5
 local timeSinceLastSpawn = 0
 
 -- Win/Lose conditions
-local gameRunning = true
 local win = false
 local scoreToWin = 10
 local missesToLose = 3
+
+-- Scenes
+local sceneMenu = true
+local sceneGameplay = false
+local sceneGameFinished = false
 
 function love.load()
     -- Player
@@ -41,27 +45,35 @@ function love.load()
     hotDogImage = love.graphics.newImage("res/HotDog.png")
     hotDogWidth = hotDogImage:getWidth() * scale
     hotDogHeight = hotDogImage:getHeight() * scale
+
+    -- Fonts
+    largeFont = love.graphics.newFont(48)
+    mediumFont = love.graphics.newFont(24)
 end
 
 function love.update(dt)
-    if gameRunning then
 
+    if sceneMenu then
+        if love.keyboard.isDown("space") then
+            initGame()
+            sceneGameplay = true
+            sceneMenu = false
+        end
+
+    elseif sceneGameplay then
         movePlayer(dt)
-
         generateHotDog(dt)
-
         checkEatHotDog()
-
         checkHotDogDespawn(dt)
 
         -- Check win/Lose-- Verificar si ha ganado o perdido
         if player.score >= scoreToWin then
-            gameRunning = false
+            sceneGameplay = false
             win = true
         end
 
         if player.missed >= missesToLose then
-            gameRunning = false
+            sceneGameplay = false
             win = false
         end
     end
@@ -69,15 +81,20 @@ function love.update(dt)
 end
 
 function love.draw()
-    if gameRunning then
+    if sceneMenu then
+        drawMenu()
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setFont(largeFont)
+        love.graphics.printf("Catch the Hot Dog", 0, love.graphics.getHeight() / 5, love.graphics.getWidth(), "center")
+        love.graphics.setFont(mediumFont)
+        love.graphics
+            .printf("Press space to play", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+
+    elseif sceneGameplay then
         -- Player
         love.graphics.draw(player.image, player.posX, player.posY)
-
-        -- HotDogs
-        for _, img in ipairs(hotDog) do
-            love.graphics.draw(hotDogImage, img.x, img.y, 0, scale, scale)
-        end
-
+        drawHotDogs()
+        drawStats()
     else
         if win then
             love.graphics.printf("You Won!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
@@ -86,6 +103,19 @@ function love.draw()
                 .printf("You Lost!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
         end
     end
+end
+
+function initGame()
+    player.score = 0
+    player.missed = 0
+    timeSinceLastSpawn = 0
+    sceneMenu = true
+    sceneGameplay = false
+    sceneGameFinished = false
+    win = false
+    hotDog = {}
+    player.width = player.image:getWidth()
+    player.height = player.image:getHeight()
 end
 
 function movePlayer(dt)
@@ -141,4 +171,23 @@ function checkHotDogDespawn(dt)
             player.missed = player.missed + 1
         end
     end
+end
+
+function drawMenu()
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.setFont(largeFont)
+    love.graphics.printf("Catch the Hot Dog", 0, love.graphics.getHeight() / 5, love.graphics.getWidth(), "center")
+    love.graphics.setFont(mediumFont)
+    love.graphics.printf("Press space to play", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+end
+
+function drawHotDogs()
+    for _, img in ipairs(hotDog) do
+        love.graphics.draw(hotDogImage, img.x, img.y, 0, scale, scale)
+    end
+end
+
+function drawStats()
+    love.graphics.print("Eaten: " .. player.score, 10, 10)
+    love.graphics.print("Missed: " .. player.missed, 10, 50)
 end
