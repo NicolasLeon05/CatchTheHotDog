@@ -140,6 +140,22 @@ function movePlayer(dt)
         player.flip = -1
         player.posX = player.posX + player.speed * dt
     end
+
+    if player.posX < player.width / 2 then
+        player.posX = player.width / 2
+    end
+
+    if player.posX > screenWidth - player.width / 2 then
+        player.posX = screenWidth - player.width / 2
+    end
+
+    if player.posY < player.height / 2 then
+        player.posY = player.height / 2
+    end
+
+    if player.posY > screenHeight - player.height / 2 then
+        player.posY = screenHeight - player.height / 2
+    end
 end
 
 function checkCollision(player, hotDogX, hotDogY, hotDogWidth, hotDogHeight)
