@@ -8,6 +8,7 @@ local player = {
     posY,
     speed = 500,
     image,
+    flip,
     width,
     height,
     score,
@@ -21,8 +22,8 @@ local hotDogWidth
 local hotDogHeight
 local scale = 0.2
 -- HotDogs timers
-local lifeTime = 1.5
-local spawnTime = 1.5
+local lifeTime = 1
+local spawnTime = 1
 local timeSinceLastSpawn = 0
 
 -- Win/Lose conditions
@@ -34,6 +35,10 @@ local missesToLose = 3
 local sceneMenu = true
 local sceneGameplay = false
 local sceneGameFinished = false
+
+-- Backgrounds
+local menuBackground
+local gameplayBackground
 
 function love.load()
     -- Player
@@ -49,6 +54,10 @@ function love.load()
     -- Fonts
     largeFont = love.graphics.newFont(48)
     mediumFont = love.graphics.newFont(24)
+
+    -- Backgrounds
+    menuBackground = love.graphics.newImage("res/TitleScreen.jpg")
+    gameplayBackground = love.graphics.newImage("res/GameScreen.jpg")
 end
 
 function love.update(dt)
@@ -94,37 +103,11 @@ end
 function love.draw()
     if sceneMenu then
         drawMenu()
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.setFont(largeFont)
-        love.graphics.printf("Catch the Hot Dog", 0, love.graphics.getHeight() / 5, love.graphics.getWidth(), "center")
-        love.graphics.setFont(mediumFont)
-        love.graphics
-            .printf("Press space to play", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
-
     elseif sceneGameplay then
-        -- Player
-        love.graphics.draw(player.image, player.posX, player.posY)
-        drawHotDogs()
-        drawStats()
+        drawGameplay()
 
     elseif sceneGameFinished then
-        love.graphics.setColor(1, 1, 1, 1)
-        if win then
-            love.graphics.setFont(largeFont)
-            love.graphics.printf("You Won!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
-
-            love.graphics.setFont(mediumFont)
-            love.graphics.printf("Press ESC to go to the menu or Space to restart", 0,
-                love.graphics.getHeight() / 2 + 50, love.graphics.getWidth(), "center")
-        else
-            love.graphics.setFont(largeFont)
-            love.graphics
-                .printf("You Lost!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
-
-            love.graphics.setFont(mediumFont)
-            love.graphics.printf("Press ESC to go to the menu or Space to restart", 0,
-                love.graphics.getHeight() / 2 + 50, love.graphics.getWidth(), "center")
-        end
+        drawGameEnded()
     end
 end
 
@@ -137,6 +120,7 @@ function initGame()
     sceneGameFinished = false
     win = false
     hotDog = {}
+    player.flip = 1 -- Looks to the right
     player.posX = screenWidth / 2 - player.width / 2
     player.posY = screenHeight / 2 - player.height / 2
 end
@@ -149,16 +133,18 @@ function movePlayer(dt)
         player.posY = player.posY + player.speed * dt
     end
     if love.keyboard.isDown("a") then
+        player.flip = 1
         player.posX = player.posX - player.speed * dt
     end
     if love.keyboard.isDown("d") then
+        player.flip = -1
         player.posX = player.posX + player.speed * dt
     end
 end
 
 function checkCollision(player, hotDogX, hotDogY, hotDogWidth, hotDogHeight)
-    return player.posX < hotDogX + hotDogWidth and player.posX + player.width > hotDogX and player.posY < hotDogY +
-               hotDogHeight and player.posY + player.height > hotDogY
+    return player.posX - player.width / 2 < hotDogX + hotDogWidth and player.posX + player.width / 2 > hotDogX and
+               player.posY - player.height / 2 < hotDogY + hotDogHeight and player.posY + player.height / 2 > hotDogY
 end
 
 function spawnImage()
@@ -208,10 +194,28 @@ end
 
 function drawMenu()
     love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.draw(menuBackground, 0, 0, 0, love.graphics.getWidth() / menuBackground:getWidth(),
+        love.graphics.getHeight() / menuBackground:getHeight())
+    love.graphics.setColor(0, 0, 0, 1)
     love.graphics.setFont(largeFont)
     love.graphics.printf("Catch the Hot Dog", 0, love.graphics.getHeight() / 5, love.graphics.getWidth(), "center")
     love.graphics.setFont(mediumFont)
     love.graphics.printf("Press space to play", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+end
+
+function drawGameplay()
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.draw(gameplayBackground, 0, 0, 0, love.graphics.getWidth() / gameplayBackground:getWidth(),
+        love.graphics.getHeight() / gameplayBackground:getHeight())
+    drawPlayer()
+    drawHotDogs()
+    love.graphics.setColor(0, 0, 0, 1)
+    drawStats()
+end
+
+function drawPlayer()
+
+    love.graphics.draw(player.image, player.posX, player.posY, 0, player.flip, 1, player.width / 2, player.height / 2)
 end
 
 function drawHotDogs()
@@ -223,4 +227,26 @@ end
 function drawStats()
     love.graphics.print("Eaten: " .. player.score, 10, 10)
     love.graphics.print("Missed: " .. player.missed, 10, 50)
+end
+
+function drawGameEnded()
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.draw(gameplayBackground, 0, 0, 0, love.graphics.getWidth() / gameplayBackground:getWidth(),
+        love.graphics.getHeight() / gameplayBackground:getHeight())
+    love.graphics.setColor(0, 0, 0, 1)
+    if win then
+        love.graphics.setFont(largeFont)
+        love.graphics.printf("You Won!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
+
+        love.graphics.setFont(mediumFont)
+        love.graphics.printf("Press ESC to go to the menu or Space to restart", 0, love.graphics.getHeight() / 2 + 50,
+            love.graphics.getWidth(), "center")
+    else
+        love.graphics.setFont(largeFont)
+        love.graphics.printf("You Lost!", 0, love.graphics.getHeight() / 2 - 100, love.graphics.getWidth(), "center")
+
+        love.graphics.setFont(mediumFont)
+        love.graphics.printf("Press ESC to go to the menu or Space to restart", 0, love.graphics.getHeight() / 2 + 50,
+            love.graphics.getWidth(), "center")
+    end
 end
