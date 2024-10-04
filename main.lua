@@ -163,8 +163,18 @@ end
 
 function spawnImage()
     local img = {}
-    img.x = math.random(0, love.graphics.getWidth() - hotDogWidth)
-    img.y = math.random(0, love.graphics.getHeight() - hotDogHeight)
+    local spawnInPlayer = true
+
+    -- Make sure the hotDog dosn't spawn inside the player
+    while spawnInPlayer do
+        img.x = math.random(0, love.graphics.getWidth() - hotDogWidth)
+        img.y = math.random(0, love.graphics.getHeight() - hotDogHeight)
+
+        if not checkCollision(player, img.x, img.y, hotDogWidth, hotDogHeight) then
+            spawnInPlayer = false
+        end
+    end
+
     img.time = 0
     table.insert(hotDog, img)
 end
